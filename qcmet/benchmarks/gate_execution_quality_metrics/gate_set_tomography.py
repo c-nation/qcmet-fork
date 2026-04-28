@@ -439,7 +439,7 @@ class GST(BaseBenchmark):
         Returns:
             Dict[str, Any]: Metrics keyed by gate label:
                 - 'Process Fidelity Gate:{gate}'
-                - 'Diamond Norm of Gate:{gate}' (if `cvxpy` available)
+                - 'Half Diamond Norm of Gate:{gate}' (if `cvxpy` available)
 
         """
         gates = [label.to_native() for label in self._ideal_model.operations.keys()]
@@ -453,13 +453,13 @@ class GST(BaseBenchmark):
                 )
             )
             if find_spec("cvxpy") is not None:
-                results[f"Diamond Norm of Gate:{gate}"] = float(
+                results[f"Half Diamond Norm of Gate:{gate}"] = float(
                     rptbl.half_diamond_norm(
                         self._ideal_model[gate], fitted[gate], basis
                     )
                 )
             else:
-                print("Diamond norm not computed (requires cvxpy)")
+                print("Half diamond norm not computed (requires cvxpy)")
         return results
 
     def _compute_spam_metrics(
