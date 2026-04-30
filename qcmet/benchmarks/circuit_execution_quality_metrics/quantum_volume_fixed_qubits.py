@@ -34,7 +34,7 @@ class QuantumVolumeFixedQubits(BaseBenchmark):
     for each circuit. Finally, the condition for the device achieving a
     quantum volume of 2^Nq is checked.
 
- 
+
     """
 
     def __init__(
@@ -242,9 +242,7 @@ class QuantumVolumeFixedQubits(BaseBenchmark):
             self._experiment_data.at[i, "ideal_outputs"] = compute_ideal_outputs(
                 qc=self.experiment_data["circuit"][i]
             )
-            self.ideal_outputs = compute_ideal_outputs(
-                qc=self.experiment_data["circuit"][i]
-            )
+            self.ideal_outputs = self._experiment_data["ideal_outputs"][i]
             self._experiment_data.at[i, "heavy_outputs"] = self._get_heavy_outputs()
             self._get_heavy_outputs()
             self._get_heavy_output_counts(
