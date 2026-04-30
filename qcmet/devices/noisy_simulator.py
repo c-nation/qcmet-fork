@@ -15,15 +15,17 @@ from qcmet.devices import AerSimulator
 class NoisySimulator(AerSimulator):
     """Noisy AerSimulator using custom noise model."""
 
-    def __init__(self, num_qubits = 5,
-                overrotation_amount = np.pi / 100,
-                detuning_amount = np.pi / 120,
-                error_1q = 0.005,
-                error_2q = 0.05,
-                t1=50e3,
-                t2=70e3,
-                **kwargs
-                 ):
+    def __init__(
+        self,
+        num_qubits=5,
+        overrotation_amount=np.pi / 100,
+        detuning_amount=np.pi / 120,
+        error_1q=0.005,
+        error_2q=0.05,
+        t1=50e3,
+        t2=70e3,
+        **kwargs,
+    ):
         """Initialize a noisy Aer-based simulator with a configurable noise model.
 
         This constructor sets up a Qiskit Aer simulator that emulates realistic device
@@ -74,20 +76,20 @@ class NoisySimulator(AerSimulator):
             Create a 7-qubit noisy simulator with custom depolarizing strengths:
 
                 >>> sim = NoisySimulator(num_qubits=7, error_1q=5e-3, error_2q=5e-2)
-                
+
         """
         self.num_qubits = num_qubits
         self.overrotation_amount = overrotation_amount
         self.detuning_amount = detuning_amount
         self.t1 = t1
-        self.t2 = 2*self.t1 if t2>(2*self.t1) else t2
+        self.t2 = 2 * self.t1 if t2 > (2 * self.t1) else t2
         self.error_1q = error_1q
         self.error_2q = error_2q
         self.t1 = t1
         self.t2 = t2
-        
+
         super().__init__(self.noise_model(), self.noise_model().basis_gates, **kwargs)
-        self.properties['num_qubits'] = num_qubits
+        self.properties["num_qubits"] = num_qubits
 
     def noise_model(self):
         r"""Define custom noise model.
@@ -115,7 +117,7 @@ class NoisySimulator(AerSimulator):
             a large quantum circuit. The depolarizing parameter used for this gate
             is gamma_D = 0.0005.
 
-        For all of the 2-qubi CX gates applied, after the ideal CX gate the following
+        For all of the 2-qubit CX gates applied, after the ideal CX gate the following
         noise contributions are added:
         - an exp^(-i*ZX\*theta_zx/2) operation and an exp^(-i\*ZZ*theta_zz/2) operation
             on the 2-qubit subspace the CX gate acts on.
@@ -131,11 +133,13 @@ class NoisySimulator(AerSimulator):
 
         """
         if self.t1 or self.t2 not in (None, 0):
-            self.thermal_relaxation =  True
+            self.thermal_relaxation = True
             thermal_relax_error_1q = thermal_relaxation_error(
-                self.t1, self.t2, 10,
+                self.t1,
+                self.t2,
+                10,
             )
-        
+
         else:
             self.thermal_relaxation = False
         overrotation_amount = self.overrotation_amount
@@ -162,7 +166,6 @@ class NoisySimulator(AerSimulator):
         # noise_model.add_all_qubit_quantum_error(depolarizing_error(0.00005, 1), ["rz"])
         noise_model.add_all_qubit_quantum_error(error_1q, ["sx"], warnings=False)
 
-        
         if self.thermal_relaxation:
             for j in range(self.num_qubits):
                 noise_model.add_quantum_error(
@@ -173,7 +176,9 @@ class NoisySimulator(AerSimulator):
                 )
                 for k in range(self.num_qubits):
                     noise_model.add_quantum_error(
-                        thermal_relax_error_1q.expand(thermal_relax_error_1q), "cx", [j, k]
+                        thermal_relax_error_1q.expand(thermal_relax_error_1q),
+                        "cx",
+                        [j, k],
                     )
 
         noise_model.add_all_qubit_quantum_error(error_2q, ["cx"], warnings=False)
