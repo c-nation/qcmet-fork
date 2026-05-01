@@ -215,7 +215,7 @@ class UpperBoundOnVD(BaseBenchmark):
         self.parse_target_circuit(self.config["target_circuit"])
 
         trap_circuits = []
-        print(self.config["num_trap_circuits"])
+
         for _ in range(self.config["num_trap_circuits"]):
             trap_circuit = QuantumCircuit(self.config["target_circuit"].num_qubits)
             trap_circuit_replacer_gates = [trap_circuit.h, trap_circuit.s]
