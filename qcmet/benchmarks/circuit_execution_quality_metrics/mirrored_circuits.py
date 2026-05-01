@@ -219,11 +219,11 @@ class MirroredCircuits(BaseBenchmark):
                 self.experiment_data["expected_bitstrings"][i]
                 not in self.experiment_data["circuit_measurements"][i].keys()
             ):
-                continue
-
-            correct_counts = self.experiment_data["circuit_measurements"][i][
-                self.experiment_data["expected_bitstrings"][i]
-            ]
+                correct_counts = 0
+            else:
+                correct_counts = self.experiment_data["circuit_measurements"][i][
+                    self.experiment_data["expected_bitstrings"][i]
+                ]
 
             polarization = (
                 correct_counts / self._runtime_params["num_shots"]
