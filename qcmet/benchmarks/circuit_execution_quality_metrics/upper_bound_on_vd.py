@@ -34,8 +34,8 @@ class UpperBoundOnVD(BaseBenchmark):
     def __init__(
         self,
         target_circuit: QuantumCircuit,
-        mu: float = 0.0001,
-        eta: float = 0.9999,
+        mu: float = 0.1,
+        eta: float = 0.95,
         qubits: int | List[int] = None,
         seed: int | None = None,
         save_path: str | Path | FileManager | None = None,
@@ -46,8 +46,8 @@ class UpperBoundOnVD(BaseBenchmark):
             target_circuit (QuantumCircuit): A target circuit to estimate the upper bound on VD for.
                 The target circuit must follow the restriction such that it has alternating cycles
                 of one-qubit and two-qubit gates, and the two-qubit gates must be CZ gates.
-            mu (float, optional): The desired accuracy of the benchmark ∈ (0, 1). Defaults to 0.0001.
-            eta (float, optional): The desired confidence of the benchmark ∈ (0, 1). Defaults to 0.9999.
+            mu (float, optional): The desired accuracy of the benchmark ∈ (0, 1). Defaults to 0.1.
+            eta (float, optional): The desired confidence of the benchmark ∈ (0, 1). Defaults to 0.95.
             qubits (int | List[int]): The number of qubits as either a list of qubit
                 indices or int specifying number of qubits. Defaults to number of qubits in target circuit.
             seed (int, optional): Random seed to use for randomisations. Defaults to None.
@@ -215,6 +215,7 @@ class UpperBoundOnVD(BaseBenchmark):
         self.parse_target_circuit(self.config["target_circuit"])
 
         trap_circuits = []
+
         for _ in range(self.config["num_trap_circuits"]):
             trap_circuit = QuantumCircuit(self.config["target_circuit"].num_qubits)
             trap_circuit_replacer_gates = [trap_circuit.h, trap_circuit.s]
