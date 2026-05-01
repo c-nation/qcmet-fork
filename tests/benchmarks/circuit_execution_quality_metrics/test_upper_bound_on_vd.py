@@ -48,7 +48,7 @@ def upper_bound_on_vd_instance():
         target_circuit.cz(0, 3)
         target_circuit.x(0)
         target_circuit.cz(1, 3)
-    vd = UpperBoundOnVD(target_circuit)
+    vd = UpperBoundOnVD(target_circuit, mu=0.4, eta=0.7)
     return vd
 
 
