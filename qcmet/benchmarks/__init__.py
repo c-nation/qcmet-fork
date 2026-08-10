@@ -11,7 +11,6 @@ from .circuit_execution_quality_metrics import (
     UpperBoundOnVD,
 )
 from .gate_execution_quality_metrics import (
-    GST,
     CliffordRB,
     CycleBenchmarking,
     InterleavedRB,
@@ -20,11 +19,9 @@ from .gate_execution_quality_metrics import (
 from .qubit_quality_metrics import T1, T2, IdleQubitOscillationFrequency
 from .well_studied_task_execution_quality_metrics import (
     QFT,
-    VQE,
     HamiltonianSimulation,
     QScoreSingleInstance,
     Simulation1DFermiHubbard,
-    VQE1DFermiHubbard,
 )
 
 __all__ = [
@@ -48,3 +45,15 @@ __all__ = [
     "UpperBoundOnVD",
     "BenchmarkCollection",
 ]
+
+
+def __getattr__(name):
+    if name == "GST":
+        from .gate_execution_quality_metrics import GST
+
+        return GST
+    if name in {"VQE", "VQE1DFermiHubbard"}:
+        from .well_studied_task_execution_quality_metrics import VQE, VQE1DFermiHubbard
+
+        return VQE if name == "VQE" else VQE1DFermiHubbard
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

@@ -5,11 +5,9 @@ computers.
 """
 
 from .benchmarks import (
-    GST,
     QFT,
     T1,
     T2,
-    VQE,
     BenchmarkCollection,
     CliffordRB,
     CycleBenchmarking,
@@ -22,7 +20,6 @@ from .benchmarks import (
     QuantumVolumeFixedQubits,
     Simulation1DFermiHubbard,
     UpperBoundOnVD,
-    VQE1DFermiHubbard,
 )
 from .core import FileManager
 from .devices import (
@@ -59,5 +56,17 @@ __all__ = [
     "UpperBoundOnVD",
     "BenchmarkCollection",
 ]
+
+
+def __getattr__(name):
+    if name == "GST":
+        from .benchmarks import GST
+
+        return GST
+    if name in {"VQE", "VQE1DFermiHubbard"}:
+        from .benchmarks import VQE, VQE1DFermiHubbard
+
+        return VQE if name == "VQE" else VQE1DFermiHubbard
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 __version__ = "1.0.0"

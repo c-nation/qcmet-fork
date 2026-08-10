@@ -123,7 +123,7 @@ class BaseBenchmark(ABC):
 
         self.config: Dict[str, Any] = {}
         self.name: str = name
-        self._experiment_data: DataFrame = None
+        self._experiment_data: DataFrame | None = None
 
         self.save_enabled = True if save_path else False
         if isinstance(save_path, str):
