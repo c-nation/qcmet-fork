@@ -8,4 +8,4 @@ class IdealSimulator(AerSimulator):
 
     def __init__(self):
         """Construct IdealSimulator."""
-        super().__init__(noise_model= None, basis_gates=["u1", "u2", "u3", "cx"])
+        super().__init__(noise_model=None, basis_gates=["u1", "u2", "u3", "cx"])

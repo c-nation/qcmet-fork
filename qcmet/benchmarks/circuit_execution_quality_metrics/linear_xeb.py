@@ -1,6 +1,10 @@
 """
 Linear Cross-Entropy Benchmark
 
+TODO:
+Add support for different types of entangling gates (e.g., CNOT, CZ, etc.)
+and single qubit gates (e.g., Google's XEB gates, etc.).
+
 """
 
 from __future__ import annotations
@@ -8,13 +12,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, List
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
     from pathlib import Path
 
     from qcmet.core import FileManager
 
 import numpy as np
-from qiskit import QiskitError, QuantumCircuit
+from qiskit import QuantumCircuit
 from qiskit.circuit.library import UnitaryGate
 from qiskit.quantum_info import Statevector
 
@@ -26,7 +29,6 @@ class LinearXEB(BaseBenchmark):
                  qubits: int | List[int],
                  depth: int | List[int],
                  num_circuits: int,  # number of distinct random circuits to generate for each depth
-                 backend: str | None = None,  # backend to run the circuits on
                  seed: int | None = None,
                  save_path: str | Path | FileManager | None = None):
         super().__init__("LinearXEB", qubits, save_path)
@@ -36,7 +38,6 @@ class LinearXEB(BaseBenchmark):
         self.config["entangling_gates"] = "cz" # Type of entangling gates to use (e.g., CNOT, CZ)
         self.config["single_qubit_gates"] = "haar_su2" # Type of single qubit gates to use (e.g., Haar, Google's XEB gates, ...)
         self.config["seed"] = seed
-        self.config["backend"] = backend if backend is not None else "qasm_simulator"  # Default to qasm_simulator if no backend is provided
 
         self.rng = np.random.default_rng(seed)
 
@@ -61,15 +62,12 @@ class LinearXEB(BaseBenchmark):
             # Add a layer of disjoint CZ gates to the circuit
             n_layers = circuit.depth()
             layer_parity = int(((n_layers - 1) / 2) % 2)
-            print(layer_parity)
             n_qubits = circuit.num_qubits
             for i in range(0, n_qubits - 1, 2):
                 if layer_parity == 0:
                     circuit.cz(i, i + 1)  # (0, 1), (2, 3), ...
                 else:
-                    print('here')
                     circuit.cz(i + 1, i + 2 if i + 2 < n_qubits else 0)  # (1, 2), (3, 4), ... (n, 0) if n is even, else (1, 2), (3, 4), ..., (n-2, n-1)
-                # circuit.cz(i, i + 1)
         else:
             raise ValueError(f"Unsupported entangling gate type: {self.config['entangling_gates']}")
 
@@ -89,13 +87,14 @@ class LinearXEB(BaseBenchmark):
         Generates a list of random circuits for the given number of qubits and depth.
         """
         circuits = []
-        for _ in range(self.config["num_circuits"]):
-            if isinstance(self.config["qubits"], list):  # If qubits is a list, generate circuits for each specified number of qubits
-                for qubits in self.config["qubits"]:
-                    circuit = self.build_circuit(qubits, self.config["depth"])
-                    circuits.append(circuit)
-            else:  # If qubits is a single integer, generate circuits for that number of qubits
-                circuit = self.build_circuit(self.config["qubits"], self.config["depth"])
+        depths = self.config["depth"]
+        if isinstance(depths, int):
+            depths = [depths]
+
+        for depth in depths:
+            for _ in range(self.config["num_circuits"]):
+                circuit = self.build_circuit(self.num_qubits, depth)
+                circuit.measure_all()
                 circuits.append(circuit)
 
         return circuits
@@ -116,10 +115,14 @@ class LinearXEB(BaseBenchmark):
         Returns:
             dict[str, float]: A dictionary mapping bitstrings to their ideal probabilities.
         """
+
+        c = circuit.remove_final_measurements(inplace=False)
+        if c is not None:
+            circuit = c
         statevector = Statevector.from_instruction(circuit)
         return {
             bitstring: float(
-                abs(statevector[int(bitstring, 2)]) ** 2
+                abs(statevector[int(bitstring[::-1], 2)]) ** 2
             )
             for bitstring in observed_bitstrings
         }
@@ -141,7 +144,7 @@ class LinearXEB(BaseBenchmark):
                 for bitstring, count in counts.items()
             )
 
-            # Common linear-XEB normalization:
+            # Linear-XEB normalization:
             fidelity = (2**circuit.num_qubits) * fidelity - 1
             fidelities.append(fidelity)
 
