@@ -29,7 +29,28 @@ def test_build_circuit_structure(draw=True):
     if draw:
         print(circuit.draw())
 
+
+def test_fidelity_calculation():
+    """Test the fidelity calculation for a simple circuit.
+    TODO: Add more comprehensive tests with different circuits and counts.
+    """
+    n_qubits = 2
+    depth = 1
+
+    circuit = QuantumCircuit(n_qubits)
+    # circuit.h(0)
+    circuit.measure_all()
+    linear_xeb_instance = LinearXEB(
+        qubits=n_qubits, depth=depth, num_circuits=1, seed=42
+    )
+    counts = {"00": 1, "01": 0, "10": 0, "11": 0}  # Example counts from a run
+
+    fidelity = linear_xeb_instance._cross_entropy_fidelity(circuit, counts)
+    assert fidelity == 3.0  # 2^n - 1 for n=2, since only the |00> state has non-zero probability
+    
+
 if __name__ == "__main__":
     test_build_circuit_structure()
+    test_fidelity_calculation()
     print("All tests passed.")
     

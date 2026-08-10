@@ -127,6 +127,30 @@ class LinearXEB(BaseBenchmark):
             for bitstring in observed_bitstrings
         }
 
+    def _cross_entropy_fidelity(self, circuit: QuantumCircuit, counts: dict[str, int]) -> float:
+        """
+        Calculates the fidelity of a given circuit based on the observed counts and the ideal probabilities.
+
+        Args:
+            circuit (QuantumCircuit): The quantum circuit for which to calculate fidelity.
+            counts (dict[str, int]): A dictionary of observed counts from executing the circuit.
+
+        Returns:
+            float: The calculated fidelity value.
+        """
+        probabilities = self._ideal_probabilities(circuit, list(counts.keys()))
+        print(probabilities)
+        shots = sum(counts.values())
+
+        fidelity = sum(
+            (count / shots) * probabilities.get(bitstring, 0.0)
+            for bitstring, count in counts.items()
+        )
+
+        # Linear-XEB normalization:
+        fidelity = (2**circuit.num_qubits) * fidelity - 1
+        return fidelity
+
     def _analyze(self) -> dict[str, Any]:
         fidelities = []
 
@@ -135,17 +159,8 @@ class LinearXEB(BaseBenchmark):
             self.experiment_data["circuit_measurements"],
             strict=True,
         ):
-            
-            probabilities = self._ideal_probabilities(circuit, list(counts.keys()))
-            shots = sum(counts.values())
 
-            fidelity = sum(
-                (count / shots) * probabilities.get(bitstring, 0.0)
-                for bitstring, count in counts.items()
-            )
-
-            # Linear-XEB normalization:
-            fidelity = (2**circuit.num_qubits) * fidelity - 1
+            fidelity = self._cross_entropy_fidelity(circuit, counts)
             fidelities.append(fidelity)
 
         self.experiment_data["linear_xeb_fidelity"] = fidelities

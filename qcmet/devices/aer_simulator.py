@@ -30,17 +30,25 @@ class AerSimulatorBase(QiskitDevice):
 
     """
 
-    def __init__(self, noise_model: NoiseModel = None, basis_gates=None, **kwargs):
+    def __init__(
+        self,
+        noise_model: NoiseModel | None = None,
+        basis_gates=None,
+        seed_simulator: int | None = None,
+        **kwargs,
+    ):
         """Initialize the Aer simulator device.
 
         Args:
             noise_model (NoiseModel, optional): A Qiskit Aer noise model to simulate noisy execution.
             basis_gates (list[str], optional): Restrict transpiled circuits to specific gate set.
+            seed_simulator (int, optional): Seed for repeatable shot sampling.
             **kwargs: Additional keyword arguments passed through to the AerSimulator constructor
 
         """
         super().__init__("aer_simulator")
         self.properties["noise_model"] = noise_model
+        self.seed_simulator = seed_simulator
         self.sim = AerSimulator(
             noise_model=noise_model, basis_gates=basis_gates, **kwargs
         )
@@ -64,7 +72,11 @@ class AerSimulatorBase(QiskitDevice):
 
         """
         t_circuits = self.passmanager.run(circuits)
-        results = self.sim.run(t_circuits, shots=num_shots).result()
+        results = self.sim.run(
+            t_circuits,
+            shots=num_shots,
+            seed_simulator=self.seed_simulator,
+        ).result()
         counts = results.get_counts()
         if isinstance(counts, list):
             return [self.reverse_bitstrings(c) for c in counts]
