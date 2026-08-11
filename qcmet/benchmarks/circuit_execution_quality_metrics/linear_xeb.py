@@ -124,6 +124,7 @@ class LinearXEB(BaseBenchmark):
         c = circuit.remove_final_measurements(inplace=False)
         if c is not None:
             circuit = c
+        
         statevector = Statevector.from_instruction(circuit)
         return {
             bitstring: float(
@@ -144,7 +145,6 @@ class LinearXEB(BaseBenchmark):
             float: The calculated fidelity value.
         """
         probabilities = self._ideal_probabilities(circuit, list(counts.keys()))
-        print(probabilities)
         shots = sum(counts.values())
 
         fidelity = sum(

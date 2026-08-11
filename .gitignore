@@ -9,7 +9,7 @@ qasm/
 circuits/
 .history
 uv.lock
-
+personal
 # C extensions
 *.so
 
