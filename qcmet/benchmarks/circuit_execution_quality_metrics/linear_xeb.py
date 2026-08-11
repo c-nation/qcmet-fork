@@ -58,6 +58,11 @@ class LinearXEB(BaseBenchmark):
         return circuit        
 
     def _add_entangling_layer(self, circuit: QuantumCircuit):
+        """
+        Appends a layer of entangling gates to the given quantum circuit.
+        Currently supports only CZ gates in a linear nearest-neighbor configuration.
+        Alternates between even and odd pairs of qubits for each layer to ensure connectivity.
+        """
         if self.config["entangling_gates"] == "cz":
             # Add a layer of disjoint CZ gates to the circuit
             n_layers = circuit.depth()
