@@ -7,10 +7,15 @@ import sys
 from pathlib import Path
 
 from qiskit import QuantumCircuit
+from qiskit.quantum_info import Statevector
+from qiskit.circuit.library import RealAmplitudes
+
+import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from qcmet.benchmarks.circuit_execution_quality_metrics.linear_xeb import LinearXEB
+from qcmet import AerSimulator
 
 
 # build some simple circuits and test they have the correct properties
@@ -20,14 +25,13 @@ def test_build_circuit_structure():
     depth = 3
     for d in range(1, depth + 1):
         linear_xeb_instance = LinearXEB(
-            qubits=n_qubits, depth=depth, num_circuits=1, seed=42
+            qubits=n_qubits, depth=d, num_circuits=1, seed=42
         )
-        circuit = linear_xeb_instance.build_circuit(num_qubits=n_qubits, depth=depth)
+        circuit = linear_xeb_instance.build_circuit(num_qubits=n_qubits, depth=d)
         assert isinstance(circuit, QuantumCircuit)
         assert circuit.num_qubits == n_qubits
         # Check that the number of layers is as expected (depth * 2 for single + entangling)
         assert circuit.depth() == d * 2, f"Expected {d * 2} layers, got {circuit.depth()} \n {circuit.draw()}"
-
 
 
 def test_fidelity_calculation():
@@ -49,10 +53,96 @@ def test_fidelity_calculation():
     assert fidelity == 3.0  # 2^n - 1 for n=2, since only the |00> state has non-zero probability
 
 
+def test_bitstring_conversion():
+    """Verify bitstring reversal matches Statevector indexing."""
+    
+    # Simple Bell state on 2 qubits
+    circuit = QuantumCircuit(2)
+    circuit.h(0)
+    circuit.cx(0, 1)
+    
+    # Ground truth from Statevector
+    sv = Statevector.from_instruction(circuit)
+    sv_probs = sv.probabilities_dict(decimals=10)
+    
+    # Get ideal from LinearXEB._ideal_probabilities
+    xeb = LinearXEB(qubits=2, depth=1, num_circuits=1, seed=42)
+    
+    # Query all possible bitstrings
+    all_bitstrings = [format(i, '02b') for i in range(4)]
+    ideal_probs = xeb._ideal_probabilities(circuit, all_bitstrings)
+    
+    # They should match
+    for bitstring, prob in sv_probs.items():
+        xeb_prob = ideal_probs.get(bitstring, 0)
+        assert abs(xeb_prob - prob) < 1e-6, \
+            f"Mismatch at {bitstring}: SV={prob}, XEB={xeb_prob}"
 
 
-if __name__ == "__main__":
-    test_build_circuit_structure()
-    test_fidelity_calculation()
-    print("All tests passed.")
+def test_known_circuit_fidelity():
+    """Test fidelity on circuit with known answer."""
+    
+    # |00⟩ state: ideal_probs = {"00": 1.0}, others = 0
+    # If we sample 1000 shots of |00⟩: empirical ≈ {"00": 1000}
+    # H = 1.0 * 1.0 = 1.0
+    # F = 2^2 * 1.0 - 1 = 4 - 1 = 3.0
+    
+    circuit = QuantumCircuit(2)  # Preparates |00⟩
+    
+    # Verify ideal probs match Statevector
+    sv = Statevector.from_instruction(circuit)
+    sv_probs = sv.probabilities_dict()
+    
+    xeb = LinearXEB(qubits=2, depth=1, num_circuits=1, seed=42)
+    ideal_probs = xeb._ideal_probabilities(circuit, list(sv_probs.keys()))
+    
+    for bitstring, sv_prob in sv_probs.items():
+        xeb_prob = ideal_probs.get(bitstring, 0)
+        assert abs(xeb_prob - sv_prob) < 1e-6, \
+            f"Ideal prob mismatch at {bitstring}: SV={sv_prob}, XEB={xeb_prob}"
+    
+    # Now test fidelity
+    counts = {"00": 1000}  # Perfect sampling
+    fidelity = xeb._cross_entropy_fidelity(circuit, counts)
+    
+    assert fidelity == 3.0, f"Expected F=3.0 (unscrambled |00⟩), got {fidelity}"
+
+
+def test_perfect_sampling_high_fidelity():
+    """Test that perfect sampling with scrambled circuit gives F≈1."""
+
+    n_qubits = 6
+    depth = 20
+    num_circuits = 100
+    seed = 42
+    experiment = LinearXEB(
+        qubits=n_qubits,
+        depth=depth,
+        num_circuits=num_circuits,
+        seed=seed,
+    )
+
+    experiment.generate_circuits()
+    experiment.run(
+        device=AerSimulator(seed_simulator=seed),
+        num_shots=500
+    )
+
+    assert 0.9 < experiment.analyze()['mean_fidelity'] < 1.1
+
+
+def test_fidelity_haar_unitary():
+    """
+    TODO: Sample from actual Haar unitaries. This should get the fidelity closer to 1 than the practical random circuits.
+    """
+    pass
+
+
+# if __name__ == "__main__":
+#     test_build_circuit_structure()
+#     test_fidelity_calculation()
+#     test_bitstring_conversion()
+#     test_known_circuit_fidelity()
+#     test_perfect_sampling_high_fidelity()
+#     print("All tests passed.")
     

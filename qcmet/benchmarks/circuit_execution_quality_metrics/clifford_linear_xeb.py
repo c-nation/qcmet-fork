@@ -22,6 +22,7 @@ from qiskit.quantum_info import Clifford, Pauli, StabilizerState, random_cliffor
 from qiskit.synthesis import synth_clifford_full
 
 from qcmet.benchmarks.circuit_execution_quality_metrics.linear_xeb import LinearXEB
+# from qcmet.benchmarks import BaseBenchmark
 
 
 class CliffordLinearXEB(LinearXEB):
@@ -51,18 +52,23 @@ class CliffordLinearXEB(LinearXEB):
             )
         return circuit
 
-    def _cnot_layer(self) -> QuantumCircuit:
-        """Add a layer of entangling gates to the circuit. Currently supports only CX gates in a linear nearest-neighbor configuration."""
+    def _cnot_layer(
+                    self,
+                    parity: int,
+                ) -> QuantumCircuit:
+        """Construct one open-chain nearest-neighbour CNOT layer.
+
+        parity=0 gives (0,1), (2,3), ...
+        parity=1 gives (1,2), (3,4), ...
+        """
+        if parity not in (0, 1):
+            raise ValueError("parity must be either 0 or 1")
+
         circuit = QuantumCircuit(self.num_qubits)
 
-        n_layers = circuit.depth()
-        layer_parity = int(((n_layers - 1) / 4) % 2)
-        
-        for i in range(0, self.num_qubits - 1, 2):
-            if layer_parity == 0:
-                circuit.cx(i, i + 1)  # (0, 1), (2, 3), ...
-            else:
-                circuit.cx(i + 1, i + 2 if i + 2 < self.num_qubits else 0) 
+        for control in range(parity, self.num_qubits - 1, 2):
+            circuit.cx(control, control + 1)
+
         return circuit
 
     def build_circuit(self, num_qubits: int, depth: int) -> QuantumCircuit:
@@ -70,9 +76,9 @@ class CliffordLinearXEB(LinearXEB):
         circuit = QuantumCircuit(num_qubits)
         for _ in range(depth):
             circuit.compose(self._random_single_qubit_clifford_layer(), inplace=True)
-            circuit.compose(self._cnot_layer(), inplace=True)
+            circuit.compose(self._cnot_layer(0), inplace=True)
             circuit.compose(self._random_single_qubit_clifford_layer(), inplace=True)
-            circuit.compose(self._cnot_layer(), inplace=True)
+            circuit.compose(self._cnot_layer(1), inplace=True)
         return circuit
 
     def _generate_circuits(self) -> List[QuantumCircuit]:
@@ -131,12 +137,10 @@ class CliffordLinearXEB(LinearXEB):
     @staticmethod
     def probability_of_bitstring(stabilizer_state: StabilizerState, bitstring: str) -> float:
         """Return one computational-basis probability from a stabilizer tableau.
-        
-        This is done by first
-        """
+                """
         num_qubits = stabilizer_state.num_qubits
         assert num_qubits is not None
-        
+
         if len(bitstring) != num_qubits or set(bitstring) - {"0", "1"}:
             raise ValueError("bitstring must contain one binary digit per qubit")
 
@@ -197,26 +201,23 @@ class CliffordLinearXEB(LinearXEB):
         return 2.0 ** (-(self.num_qubits - num_constraints))
 
     def _cross_entropy_fidelity(
-        self,
-        circuit: QuantumCircuit,
-        counts: dict[str, int],
-    ) -> float:
-        """Calculate XEB normalized to the ideal Clifford distribution."""
-        probabilities = self._ideal_probabilities(circuit, list(counts.keys()))
+                                self,
+                                circuit: QuantumCircuit,
+                                counts: dict[str, int],
+                            ) -> float:
+        """Calculate linear XEB as defined in Phys. Rev. A 108, 052613."""
         shots = sum(counts.values())
-        cross_entropy = sum(
+        if shots == 0:
+            raise ValueError("Cannot calculate XEB from zero shots")
+
+        probabilities = self._ideal_probabilities(
+            circuit,
+            list(counts.keys()),
+        )
+
+        overlap = sum(
             (count / shots) * probabilities.get(bitstring, 0.0)
             for bitstring, count in counts.items()
         )
 
-        uniform_probability = 2.0 ** (-circuit.num_qubits)
-        ideal_collision = self._ideal_collision_probability(circuit)
-        if np.isclose(ideal_collision, uniform_probability):
-            raise ValueError(
-                "Clifford XEB normalization is undefined for a uniform ideal state"
-            )
-
-        return float(
-            (cross_entropy - uniform_probability)
-            / (ideal_collision - uniform_probability)
-        )
+        return float((2.0**circuit.num_qubits) * overlap - 1.0)
