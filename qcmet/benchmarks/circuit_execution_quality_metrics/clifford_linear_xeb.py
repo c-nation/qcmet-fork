@@ -8,41 +8,42 @@ The entangling layers are brickwork overlapped.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, List
 
-if TYPE_CHECKING:
-    from collections.abc import Callable
-    from pathlib import Path
-
-    from qcmet.core import FileManager
-
 import numpy as np
-from qiskit import QiskitError, QuantumCircuit
+from qiskit import QuantumCircuit
 from qiskit.quantum_info import Clifford, Pauli, StabilizerState, random_clifford
-from qiskit.synthesis import synth_clifford_full
 
 from qcmet.benchmarks.circuit_execution_quality_metrics.linear_xeb import LinearXEB
-# from qcmet.benchmarks import BaseBenchmark
+
+if TYPE_CHECKING:
+    from qcmet.core import FileManager
 
 
 class CliffordLinearXEB(LinearXEB):
-    def __init__(self, 
-                 qubits: int | List[int],
-                 depth: int | List[int],
-                 num_circuits: int,  # number of distinct random circuits to generate for each depth
-                 seed: int | None = None,
-                 save_path: str | Path | FileManager | None = None):
+    """Linear XEB benchmark specialized to Clifford circuits."""
+
+    def __init__(
+        self,
+        qubits: int | List[int],
+        depth: int | List[int],
+        num_circuits: int,
+        seed: int | None = None,
+        save_path: str | Path | FileManager | None = None,
+    ):
+        """Initialize the Clifford linear XEB benchmark."""
         super().__init__(
-                         qubits=qubits,
-                         depth=depth,
-                         num_circuits=num_circuits,
-                         seed=seed,
-                         save_path=save_path,
-                         )
+            qubits=qubits,
+            depth=depth,
+            num_circuits=num_circuits,
+            seed=seed,
+            save_path=save_path,
+        )
         self.name = "CliffordLinearXEB"
 
     def _random_single_qubit_clifford_layer(self) -> QuantumCircuit:
-        """Generate a random single-qubit Clifford layer Q = \\otimes_i=1^n q_i for random 1 qubit Clifford q_i on qubit i."""
+        """Generate a random single-qubit Clifford layer across all qubits."""
         circuit = QuantumCircuit(self.num_qubits)
         for i in range(self.num_qubits):
             circuit.compose(
@@ -59,8 +60,7 @@ class CliffordLinearXEB(LinearXEB):
         """Construct one open-chain nearest-neighbour CNOT layer.
 
         parity=0 gives (0,1), (2,3), ...
-        parity=1 gives (1,2), (3,4), ...
-        """
+        parity=1 gives (1,2), (3,4), ..."""
         if parity not in (0, 1):
             raise ValueError("parity must be either 0 or 1")
 
@@ -72,7 +72,7 @@ class CliffordLinearXEB(LinearXEB):
         return circuit
 
     def build_circuit(self, num_qubits: int, depth: int) -> QuantumCircuit:
-        """Build a random Clifford circuit of specified depth and number of qubits."""
+        """Build a random Clifford circuit of the specified depth and qubit count."""
         circuit = QuantumCircuit(num_qubits)
         for _ in range(depth):
             circuit.compose(self._random_single_qubit_clifford_layer(), inplace=True)
@@ -82,9 +82,7 @@ class CliffordLinearXEB(LinearXEB):
         return circuit
 
     def _generate_circuits(self) -> List[QuantumCircuit]:
-        """
-        Generates a list of random circuits for the given number of qubits and depth.
-        """
+        """Generate random Clifford circuits for the configured depths."""
         circuits = []
         depths = self.config["depth"]
         if isinstance(depths, int):
@@ -136,8 +134,7 @@ class CliffordLinearXEB(LinearXEB):
 
     @staticmethod
     def probability_of_bitstring(stabilizer_state: StabilizerState, bitstring: str) -> float:
-        """Return one computational-basis probability from a stabilizer tableau.
-                """
+        """Return one computational-basis probability from a stabilizer tableau."""
         num_qubits = stabilizer_state.num_qubits
         assert num_qubits is not None
 
@@ -221,3 +218,19 @@ class CliffordLinearXEB(LinearXEB):
         )
 
         return float((2.0**circuit.num_qubits) * overlap - 1.0)
+
+    def _analyze(self) -> dict[str, Any]:
+        """Analyze the measured Clifford XEB data and return summary metrics."""
+        fidelities = []
+        for circuit, counts in zip(
+            self.experiment_data["circuit"],
+            self.experiment_data["circuit_measurements"],
+            strict=True,
+        ):
+            fidelities.append(self._cross_entropy_fidelity(circuit, counts))
+
+        self.experiment_data["linear_xeb_fidelity"] = fidelities
+        return {
+            "mean_fidelity": float(np.mean(fidelities)),
+            "fidelities": fidelities,
+        }
