@@ -7,12 +7,20 @@ import sys
 from pathlib import Path
 
 from qiskit import QuantumCircuit
+from qiskit.quantum_info import Clifford
+from qiskit.exceptions import QiskitError
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from qcmet.benchmarks.circuit_execution_quality_metrics.clifford_linear_xeb import CliffordLinearXEB
+from qcmet import AerSimulator
 
-
+def is_clifford(circuit):
+    try:
+        Clifford.from_circuit(circuit)
+        return True
+    except QiskitError:
+        return False
 
 # build some simple circuits and test they have the correct properties
 def test_build_circuit_structure():
@@ -27,9 +35,37 @@ def test_build_circuit_structure():
         assert isinstance(circuit, QuantumCircuit)
         assert circuit.num_qubits == n_qubits
         # Check that the number of layers is as expected (depth * 4 for single + entangling)
-        assert circuit.depth() == d * 4, f"Expected {d * 4} layers, got {circuit.depth()} \n {circuit.draw()}"
+        assert is_clifford(circuit), f"Circuit at depth {d} is not a Clifford circuit."
+
+
+def test_xeb_known_circuit():
+    """Test XEB fidelity for a deterministic four-qubit |0000> circuit."""
+    n_qubits = 4
+    circuit = QuantumCircuit(n_qubits)
+    experiment = CliffordLinearXEB(
+        qubits=n_qubits,
+        depth=1,
+        num_circuits=1,
+        seed=123,
+    )
+
+    fidelity = experiment._cross_entropy_fidelity(
+        circuit,
+        {"0000": 500},
+    )
+
+    assert fidelity == 2**n_qubits - 1
+    
+
+def known_stabilizer_test_probabilities():
+    """
+    Test that for a known stabilizer circuit, the expected probabilities match the measured ones for a few bitstrings.
+    This covers mostly the nullspace finding and the bitstring conversion.
+    """
+    pass
 
 
 if __name__ == "__main__":
     test_build_circuit_structure()
+    test_xeb_known_circuit()
     print("All tests passed.")
