@@ -1,4 +1,4 @@
-"""Here we implement the linear cross-entropy banchmarking with Clifford circuits following PRA 108, 052613
+"""Here we implement the linear cross-entropy banchmarking with Clifford circuits following PRA 108, 052613.
 
 We have implemented a 'cycle' as that pf the of the 1D chain (Fig 1a). This is controlled by the depth parameter. 
 A cycle thus consists of 4 layers: single qubit clifford layer, entangling layer, single qubit clifford layer, entangling layer.
@@ -24,12 +24,15 @@ from qcmet.benchmarks.circuit_execution_quality_metrics.linear_xeb import Linear
 
 
 class CliffordLinearXEB(LinearXEB):
+    """Linear XEB benchmark using Clifford circuits."""
+
     def __init__(self, 
                  qubits: int | List[int],
                  depth: int | List[int],
                  num_circuits: int,  # number of distinct random circuits to generate for each depth
                  seed: int | None = None,
                  save_path: str | Path | FileManager | None = None):
+        """Initialize CliffordLinearXEB benchmark."""
         super().__init__(
                          qubits=qubits,
                          depth=depth,
@@ -40,7 +43,7 @@ class CliffordLinearXEB(LinearXEB):
         self.name = "CliffordLinearXEB"
 
     def _random_single_qubit_clifford_layer(self) -> QuantumCircuit:
-        """Generate a random single-qubit Clifford layer Q = \\otimes_i=1^n q_i for random 1 qubit Clifford q_i on qubit i."""
+        r"""Generate a random single-qubit Clifford layer Q = \\otimes_i=1^n q_i for random 1 qubit Clifford q_i on qubit i."""
         circuit = QuantumCircuit(self.num_qubits)
         for i in range(self.num_qubits):
             circuit.compose(
@@ -80,8 +83,7 @@ class CliffordLinearXEB(LinearXEB):
         return circuit
 
     def _generate_circuits(self) -> List[QuantumCircuit]:
-        """Generates a list of random circuits for the given number of qubits and depth.
-        """
+        """Generate a list of random Clifford circuits for the given number of qubits and depth."""
         circuits = []
         depths = self.config["depth"]
         if isinstance(depths, int):
@@ -133,8 +135,7 @@ class CliffordLinearXEB(LinearXEB):
 
     @staticmethod
     def probability_of_bitstring(stabilizer_state: StabilizerState, bitstring: str) -> float:
-        """Return one computational-basis probability from a stabilizer tableau.
-        """
+        """Return one computational-basis probability from a stabilizer tableau."""
         num_qubits = stabilizer_state.num_qubits
         assert num_qubits is not None
 
