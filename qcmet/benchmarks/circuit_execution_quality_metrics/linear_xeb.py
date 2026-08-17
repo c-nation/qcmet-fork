@@ -1,7 +1,6 @@
-"""
-Linear Cross-Entropy Benchmark
+"""Linear Cross-Entropy Benchmark
 
-TODO:
+Todo:
 Add support for different types of entangling gates (e.g., CNOT, CZ, etc.)
 and single qubit gates (e.g., Google's XEB gates, etc.).
 
@@ -22,6 +21,7 @@ from qiskit.circuit.library import UnitaryGate
 from qiskit.quantum_info import Statevector
 
 from qcmet.benchmarks import BaseBenchmark
+
 
 class LinearXEB(BaseBenchmark):
 
@@ -48,8 +48,7 @@ class LinearXEB(BaseBenchmark):
         return U
 
     def _add_haar_su2_layer(self, circuit: QuantumCircuit) -> QuantumCircuit:
-        """
-        Appends a single layer of single qubit Haar-distributed SU(2) gates to the given quantum circuit.
+        """Appends a single layer of single qubit Haar-distributed SU(2) gates to the given quantum circuit.
         """
         for qubit in range(circuit.num_qubits):
             U = self._haar_su2()
@@ -58,8 +57,7 @@ class LinearXEB(BaseBenchmark):
         return circuit        
 
     def _add_entangling_layer(self, circuit: QuantumCircuit):
-        """
-        Appends a layer of entangling gates to the given quantum circuit.
+        """Appends a layer of entangling gates to the given quantum circuit.
         Currently supports only CZ gates in a linear nearest-neighbor configuration.
         Alternates between even and odd pairs of qubits for each layer to ensure connectivity.
         """
@@ -77,8 +75,7 @@ class LinearXEB(BaseBenchmark):
             raise ValueError(f"Unsupported entangling gate type: {self.config['entangling_gates']}")
 
     def build_circuit(self, num_qubits: int, depth: int) -> QuantumCircuit:
-        """
-        Builds a quantum circuit with alternating layers of single qubit Haar-distributed SU(2) gates and entangling gates.
+        """Builds a quantum circuit with alternating layers of single qubit Haar-distributed SU(2) gates and entangling gates.
         """
         circuit = QuantumCircuit(num_qubits)
 
@@ -88,8 +85,7 @@ class LinearXEB(BaseBenchmark):
         return circuit
 
     def _generate_circuits(self) -> List[QuantumCircuit]:
-        """
-        Generates a list of random circuits for the given number of qubits and depth.
+        """Generates a list of random circuits for the given number of qubits and depth.
         """
         circuits = []
         depths = self.config["depth"]
@@ -105,8 +101,7 @@ class LinearXEB(BaseBenchmark):
         return circuits
 
     def _ideal_probabilities(self, circuit: QuantumCircuit, observed_bitstrings: List[str]) -> dict[str, float]:
-        """
-        Computes the ideal output probability for a given bitstring and quantum circuit.
+        """Computes the ideal output probability for a given bitstring and quantum circuit.
 
         Uses qiskit's Statevector simulation to compute the ideal output state of the circuit, and then calculates the probability of measuring the specified bitstring.
 
@@ -119,8 +114,8 @@ class LinearXEB(BaseBenchmark):
 
         Returns:
             dict[str, float]: A dictionary mapping bitstrings to their ideal probabilities.
-        """
 
+        """
         c = circuit.remove_final_measurements(inplace=False)
         if c is not None:
             circuit = c
@@ -134,8 +129,7 @@ class LinearXEB(BaseBenchmark):
         }
 
     def _cross_entropy_fidelity(self, circuit: QuantumCircuit, counts: dict[str, int]) -> float:
-        """
-        Calculates the fidelity of a given circuit based on the observed counts and the ideal probabilities.
+        """Calculates the fidelity of a given circuit based on the observed counts and the ideal probabilities.
 
         Args:
             circuit (QuantumCircuit): The quantum circuit for which to calculate fidelity.
@@ -143,6 +137,7 @@ class LinearXEB(BaseBenchmark):
 
         Returns:
             float: The calculated fidelity value.
+
         """
         probabilities = self._ideal_probabilities(circuit, list(counts.keys()))
         shots = sum(counts.values())

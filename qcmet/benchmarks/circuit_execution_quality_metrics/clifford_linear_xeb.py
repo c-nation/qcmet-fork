@@ -1,5 +1,4 @@
-"""
-Here we implement the linear cross-entropy banchmarking with Clifford circuits following PRA 108, 052613
+"""Here we implement the linear cross-entropy banchmarking with Clifford circuits following PRA 108, 052613
 
 We have implemented a 'cycle' as that pf the of the 1D chain (Fig 1a). This is controlled by the depth parameter. 
 A cycle thus consists of 4 layers: single qubit clifford layer, entangling layer, single qubit clifford layer, entangling layer.
@@ -8,20 +7,19 @@ The entangling layers are brickwork overlapped.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
     from pathlib import Path
 
     from qcmet.core import FileManager
 
 import numpy as np
-from qiskit import QiskitError, QuantumCircuit
-from qiskit.quantum_info import Clifford, Pauli, StabilizerState, random_clifford
-from qiskit.synthesis import synth_clifford_full
+from qiskit import QuantumCircuit
+from qiskit.quantum_info import Pauli, StabilizerState, random_clifford
 
 from qcmet.benchmarks.circuit_execution_quality_metrics.linear_xeb import LinearXEB
+
 # from qcmet.benchmarks import BaseBenchmark
 
 
@@ -82,8 +80,7 @@ class CliffordLinearXEB(LinearXEB):
         return circuit
 
     def _generate_circuits(self) -> List[QuantumCircuit]:
-        """
-        Generates a list of random circuits for the given number of qubits and depth.
+        """Generates a list of random circuits for the given number of qubits and depth.
         """
         circuits = []
         depths = self.config["depth"]
@@ -137,7 +134,7 @@ class CliffordLinearXEB(LinearXEB):
     @staticmethod
     def probability_of_bitstring(stabilizer_state: StabilizerState, bitstring: str) -> float:
         """Return one computational-basis probability from a stabilizer tableau.
-                """
+        """
         num_qubits = stabilizer_state.num_qubits
         assert num_qubits is not None
 
