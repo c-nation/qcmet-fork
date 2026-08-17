@@ -23,7 +23,7 @@ dependencies = [
 
 [project.optional-dependencies]
 gst = ["pygsti"]
-  vqe = [
+vqe = [
     "openfermion>=1.7",
     "cirq",
   ]

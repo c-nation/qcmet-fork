@@ -5,9 +5,12 @@ Unit tests for GST pygsti qcmet wrapper.
 
 from pathlib import Path
 
+import pytest
+
+pytest.importorskip("pygsti")
+
 import numpy as np
 import pygsti
-import pytest
 from pygsti.modelpacks import smq1Q_XY
 
 import qcmet as qcm
