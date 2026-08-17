@@ -36,8 +36,7 @@ def test_build_circuit_structure():
 
 def test_fidelity_calculation():
     """Test the fidelity calculation for a simple circuit.
-    TODO: Add more comprehensive tests with different circuits with known fidelities.
-    """
+    TODO: Add more comprehensive tests with different circuits with known fidelities."""
     n_qubits = 2
     depth = 1
 
@@ -55,7 +54,6 @@ def test_fidelity_calculation():
 
 def test_bitstring_conversion():
     """Verify bitstring reversal matches Statevector indexing."""
-    
     # Simple Bell state on 2 qubits
     circuit = QuantumCircuit(2)
     circuit.h(0)
@@ -81,12 +79,10 @@ def test_bitstring_conversion():
 
 def test_known_circuit_fidelity():
     """Test fidelity on circuit with known answer."""
-    
     # |00⟩ state: ideal_probs = {"00": 1.0}, others = 0
     # If we sample 1000 shots of |00⟩: empirical ≈ {"00": 1000}
     # H = 1.0 * 1.0 = 1.0
     # F = 2^2 * 1.0 - 1 = 4 - 1 = 3.0
-    
     circuit = QuantumCircuit(2)  # Preparates |00⟩
     
     # Verify ideal probs match Statevector
@@ -110,7 +106,6 @@ def test_known_circuit_fidelity():
 
 def test_perfect_sampling_high_fidelity():
     """Test that perfect sampling with scrambled circuit gives F≈1."""
-
     n_qubits = 6
     depth = 20
     num_circuits = 100
@@ -132,9 +127,7 @@ def test_perfect_sampling_high_fidelity():
 
 
 def test_fidelity_haar_unitary():
-    """
-    TODO: Sample from actual Haar unitaries. This should get the fidelity closer to 1 than the practical random circuits.
-    """
+    """TODO: Sample from actual Haar unitaries. This should get the fidelity closer to 1 than the practical random circuits."""
     pass
 
 

@@ -1,7 +1,10 @@
 """Unit tests for the 1DFermiHubbardVQE benchmark in QCMet."""
 
-import numpy as np
 import pytest
+
+pytest.importorskip("openfermion")
+
+import numpy as np
 from openfermion.ops import FermionOperator, QubitOperator
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import Statevector

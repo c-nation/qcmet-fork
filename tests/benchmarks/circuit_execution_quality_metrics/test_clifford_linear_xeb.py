@@ -65,7 +65,7 @@ def known_stabilizer_test_probabilities():
     pass
 
 
-if __name__ == "__main__":
-    test_build_circuit_structure()
-    test_xeb_known_circuit()
-    print("All tests passed.")
+# if __name__ == "__main__":
+#     test_build_circuit_structure()
+#     test_xeb_known_circuit()
+#     print("All tests passed.")

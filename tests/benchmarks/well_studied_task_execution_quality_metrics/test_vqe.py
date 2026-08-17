@@ -1,7 +1,10 @@
 """Unit tests for the VQE benchmark in QCMet."""
 
-import numpy as np
 import pytest
+
+pytest.importorskip("openfermion")
+
+import numpy as np
 from openfermion.ops import QubitOperator
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import Statevector
