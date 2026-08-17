@@ -58,7 +58,8 @@ class CliffordLinearXEB(LinearXEB):
         """Construct one open-chain nearest-neighbour CNOT layer.
 
         parity=0 gives (0,1), (2,3), ...
-        parity=1 gives (1,2), (3,4), ..."""
+        parity=1 gives (1,2), (3,4), ...
+        """
         if parity not in (0, 1):
             raise ValueError("parity must be either 0 or 1")
 

@@ -1,6 +1,7 @@
-"""Tests for the LinearXEB benchmark.
-TODO: Sample from actual Haar unitaries. This should get the fidelity closer to 1 than the practical random circuits.
-TODO: Add more comprehensive tests with different circuits with known fidelities."""
+"""Tests for the LinearXEB benchmark."""
+
+# TODO: Sample from actual Haar unitaries. This should get the fidelity closer to 1 than the practical random circuits.
+# TODO: Add more comprehensive tests with different circuits with known fidelities.
 
 import sys
 from pathlib import Path

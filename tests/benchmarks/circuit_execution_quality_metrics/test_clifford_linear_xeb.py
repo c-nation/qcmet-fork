@@ -1,5 +1,6 @@
-"""Tests for the CliffordLinearXEB benchmark.
-TODO: known stabilizer test probabilities for a known circuit. This covers the nullspace finding and bitstring conversion logic."""
+"""Tests for the CliffordLinearXEB benchmark."""
+# TODO: known stabilizer test probabilities for a known circuit. 
+# This covers the nullspace finding and bitstring conversion logic.
 
 import sys
 from pathlib import Path
