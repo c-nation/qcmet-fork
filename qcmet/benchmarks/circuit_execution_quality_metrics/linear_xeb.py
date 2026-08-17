@@ -60,8 +60,7 @@ class LinearXEB(BaseBenchmark):
         return circuit
 
     def _add_entangling_layer(self, circuit: QuantumCircuit):
-        """
-        Appends a layer of entangling gates to the given quantum circuit.
+        """Append a layer of entangling gates to the given quantum circuit.
         Currently supports only CZ gates in a linear nearest-neighbor configuration.
         Alternates between even and odd pairs of qubits for each layer to ensure connectivity."""
         if self.config["entangling_gates"] == "cz":
@@ -102,8 +101,7 @@ class LinearXEB(BaseBenchmark):
         return circuits
 
     def _ideal_probabilities(self, circuit: QuantumCircuit, observed_bitstrings: List[str]) -> dict[str, float]:
-        """
-        Computes the ideal output probability for a given bitstring and quantum circuit.
+        """Compute the ideal output probability for a given bitstring and quantum circuit.
 
         Uses qiskit's Statevector simulation to compute the ideal output state of the circuit, and then calculates the probability of measuring the specified bitstring.
 
@@ -128,8 +126,7 @@ class LinearXEB(BaseBenchmark):
         }
 
     def _cross_entropy_fidelity(self, circuit: QuantumCircuit, counts: dict[str, int]) -> float:
-        """
-        Calculates the fidelity of a given circuit based on the observed counts and the ideal probabilities.
+        """Calculate the fidelity of a given circuit based on the observed counts and the ideal probabilities.
 
         Args:
             circuit (QuantumCircuit): The quantum circuit for which to calculate fidelity.

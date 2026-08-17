@@ -1,4 +1,5 @@
-"""Tests for the CliffordLinearXEB benchmark."""
+"""Tests for the CliffordLinearXEB benchmark.
+TODO: known stabilizer test probabilities for a known circuit. This covers the nullspace finding and bitstring conversion logic."""
 
 import sys
 from pathlib import Path
@@ -57,17 +58,3 @@ def test_xeb_known_circuit():
     )
 
     assert fidelity == 2**n_qubits - 1
-
-
-def known_stabilizer_test_probabilities():
-    """Test stabilizer probabilities for a known circuit.
-
-    This covers the nullspace finding and bitstring conversion logic.
-    """
-    pass
-
-
-# if __name__ == "__main__":
-#     test_build_circuit_structure()
-#     test_xeb_known_circuit()
-#     print("All tests passed.")

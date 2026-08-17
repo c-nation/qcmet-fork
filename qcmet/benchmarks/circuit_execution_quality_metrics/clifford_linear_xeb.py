@@ -1,5 +1,4 @@
-"""
-Here we implement the linear cross-entropy banchmarking with Clifford circuits following PRA 108, 052613
+"""Here we implement the linear cross-entropy banchmarking with Clifford circuits following PRA 108, 052613
 
 We have implemented a 'cycle' as that pf the of the 1D chain (Fig 1a). This is controlled by the depth parameter. 
 A cycle thus consists of 4 layers: single qubit clifford layer, entangling layer, single qubit clifford layer, entangling layer.
@@ -13,7 +12,7 @@ from typing import TYPE_CHECKING, Any, List
 
 import numpy as np
 from qiskit import QuantumCircuit
-from qiskit.quantum_info import Clifford, Pauli, StabilizerState, random_clifford
+from qiskit.quantum_info import Pauli, StabilizerState, random_clifford
 
 from qcmet.benchmarks.circuit_execution_quality_metrics.linear_xeb import LinearXEB
 

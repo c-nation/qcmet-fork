@@ -1,4 +1,5 @@
-"""Tests for the LinearXEB benchmark."""
+"""Tests for the LinearXEB benchmark.
+TODO: Sample from actual Haar unitaries. This should get the fidelity closer to 1 than the practical random circuits."""
 
 import sys
 from pathlib import Path
@@ -91,7 +92,7 @@ def test_known_circuit_fidelity():
     for bitstring, sv_prob in sv_probs.items():
         xeb_prob = ideal_probs.get(bitstring, 0)
         assert abs(xeb_prob - sv_prob) < 1e-6, (
-            f"Ideal prob mismatch at {bitstring}: SV={sv_prob}, XEB={xeb_prob}"
+            f"Ideal prob mismatch at {bitstring}: SV={sv_prob}, XEB={xeb_prob}")
     
     # Now test fidelity
     counts = {"00": 1000}  # Perfect sampling
@@ -117,18 +118,3 @@ def test_perfect_sampling_high_fidelity():
     experiment.run(device=AerSimulator(seed_simulator=seed), num_shots=500)
 
     assert 0.9 < experiment.analyze()["mean_fidelity"] < 1.1
-
-
-def test_fidelity_haar_unitary():
-    """TODO: Sample from actual Haar unitaries. This should get the fidelity closer to 1 than the practical random circuits."""
-    pass
-
-
-# if __name__ == "__main__":
-#     test_build_circuit_structure()
-#     test_fidelity_calculation()
-#     test_bitstring_conversion()
-#     test_known_circuit_fidelity()
-#     test_perfect_sampling_high_fidelity()
-#     print("All tests passed.")
-    
