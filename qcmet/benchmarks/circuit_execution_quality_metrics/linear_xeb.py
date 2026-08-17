@@ -113,8 +113,8 @@ class LinearXEB(BaseBenchmark):
             QiskitError: If the circuit is not unitary or if the bitstring length does not match the number of qubits in the circuit.
 
         Returns:
-
             dict[str, float]: A dictionary mapping bitstrings to their ideal probabilities.
+
         """
         c = circuit.remove_final_measurements(inplace=False)
         if c is not None:
@@ -134,8 +134,8 @@ class LinearXEB(BaseBenchmark):
             counts (dict[str, int]): A dictionary of observed counts from executing the circuit.
 
         Returns:
-
             float: The calculated fidelity value.
+
         """
         probabilities = self._ideal_probabilities(circuit, list(counts.keys()))
         shots = sum(counts.values())

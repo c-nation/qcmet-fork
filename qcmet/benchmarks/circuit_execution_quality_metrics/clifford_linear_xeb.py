@@ -2,7 +2,8 @@
 
 We have implemented a 'cycle' as that of the of the 1D chain (Fig 1a). This is controlled by the depth parameter. 
 A cycle thus consists of 4 layers: single qubit clifford layer, entangling layer, single qubit clifford layer, entangling layer.
-The entangling layers are brickwork overlapped."""
+The entangling layers are brickwork overlapped.
+"""
 
 from __future__ import annotations
 
