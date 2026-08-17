@@ -60,9 +60,12 @@ class LinearXEB(BaseBenchmark):
         return circuit
 
     def _add_entangling_layer(self, circuit: QuantumCircuit):
-        """Append a layer of entangling gates to the given quantum circuit.
+        """
+        Append a layer of entangling gates to the given quantum circuit.
+
         Currently supports only CZ gates in a linear nearest-neighbor configuration.
-        Alternates between even and odd pairs of qubits for each layer to ensure connectivity."""
+        Alternates between even and odd pairs of qubits for each layer to ensure connectivity.
+        """
         if self.config["entangling_gates"] == "cz":
             # Add a layer of disjoint CZ gates to the circuit
             n_layers = circuit.depth()
@@ -101,7 +104,8 @@ class LinearXEB(BaseBenchmark):
         return circuits
 
     def _ideal_probabilities(self, circuit: QuantumCircuit, observed_bitstrings: List[str]) -> dict[str, float]:
-        """Compute the ideal output probability for a given bitstring and quantum circuit.
+        """
+        Compute the ideal output probability for a given bitstring and quantum circuit.
 
         Uses qiskit's Statevector simulation to compute the ideal output state of the circuit, and then calculates the probability of measuring the specified bitstring.
 
@@ -113,7 +117,9 @@ class LinearXEB(BaseBenchmark):
             QiskitError: If the circuit is not unitary or if the bitstring length does not match the number of qubits in the circuit.
 
         Returns:
-            dict[str, float]: A dictionary mapping bitstrings to their ideal probabilities."""
+
+            dict[str, float]: A dictionary mapping bitstrings to their ideal probabilities.
+        """
 
         c = circuit.remove_final_measurements(inplace=False)
         if c is not None:
@@ -126,14 +132,17 @@ class LinearXEB(BaseBenchmark):
         }
 
     def _cross_entropy_fidelity(self, circuit: QuantumCircuit, counts: dict[str, int]) -> float:
-        """Calculate the fidelity of a given circuit based on the observed counts and the ideal probabilities.
+        """
+        Calculate the fidelity of a given circuit based on the observed counts and the ideal probabilities.
 
         Args:
             circuit (QuantumCircuit): The quantum circuit for which to calculate fidelity.
             counts (dict[str, int]): A dictionary of observed counts from executing the circuit.
 
         Returns:
-            float: The calculated fidelity value."""
+        
+            float: The calculated fidelity value.
+        """
         probabilities = self._ideal_probabilities(circuit, list(counts.keys()))
         shots = sum(counts.values())
 

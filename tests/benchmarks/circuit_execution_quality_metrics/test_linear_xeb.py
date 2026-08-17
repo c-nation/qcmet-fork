@@ -1,5 +1,6 @@
 """Tests for the LinearXEB benchmark.
-TODO: Sample from actual Haar unitaries. This should get the fidelity closer to 1 than the practical random circuits."""
+TODO: Sample from actual Haar unitaries. This should get the fidelity closer to 1 than the practical random circuits.
+TODO: Add more comprehensive tests with different circuits with known fidelities."""
 
 import sys
 from pathlib import Path
@@ -30,10 +31,7 @@ def test_build_circuit_structure():
 
 
 def test_fidelity_calculation():
-    """Test the fidelity calculation for a simple circuit.
-
-    TODO: Add more comprehensive tests with different circuits with known fidelities.
-    """
+    """Test the fidelity calculation for a simple circuit."""
     n_qubits = 2
     depth = 1
 
