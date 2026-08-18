@@ -1,5 +1,4 @@
-"""Linear Cross-Entropy Benchmark.
-"""
+"""Linear Cross-Entropy Benchmark."""
 
 # TODO: Add support for different types of entangling gates (e.g., CNOT, CZ, etc.)
 # and single qubit gates (e.g., Google's XEB gates, etc.).
