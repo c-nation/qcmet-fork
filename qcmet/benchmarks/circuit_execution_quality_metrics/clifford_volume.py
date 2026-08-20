@@ -5,11 +5,12 @@ https://arxiv.org/pdf/2512.19413
 """
 
 from __future__ import annotations
-from qiskit.quantum_info import Pauli
 
-from typing import TYPE_CHECKING, List, Any
+from typing import TYPE_CHECKING, Any, List
+
 from qiskit import QuantumCircuit
-from qiskit.quantum_info import StabilizerState
+from qiskit.quantum_info import Pauli, StabilizerState
+
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -76,7 +77,6 @@ class CliffordVolume(BaseBenchmark):
 
     def _random_clifford_circuit(self) -> QuantumCircuit:
         """Generate a random Clifford circuit of specified depth and number of qubits."""
-
         num_qubits = self.num_qubits
         depth = self.config["depth"]
         circuit = QuantumCircuit(num_qubits)
@@ -96,7 +96,6 @@ class CliffordVolume(BaseBenchmark):
         Luckily, this approach only needs a few circuits (4 in the paper), so it is not too expensive.
         This yields 4 * 8 = 32 circuits total. The bulk of the work is taking the repeated shots.
         """
-
         circuits = []
         for circuit_index in range(self.config["num_circuits"]):
             # We want to measure the stabilizers and destabilizers, not |00...0>
@@ -140,9 +139,7 @@ class CliffordVolume(BaseBenchmark):
                                    preparation_circuit: QuantumCircuit,
                                    pauli: Pauli,
                                    ) -> QuantumCircuit:
-        """Given a circuit and a set of Paulis to measure, e.g. "XIZY",
-          return a circuit that prepares the state and measures the specified Paulis."""
-
+        """Given a circuit and a set of Paulis to measure, return a circuit that prepares the state and measures the specified Paulis."""
         num_qubits = self.num_qubits
 
         # Create fresh classical bits so the output is unambiguous.
@@ -186,6 +183,7 @@ class CliffordVolume(BaseBenchmark):
 
         Returns:
             dict[str, Any]: A dictionary containing the analysis results, including the average fidelity and other relevant metrics.
+
         """
         num_shots = self._runtime_params["num_shots"]
         num_measured = self.config["num_measured_stabilizers"]
