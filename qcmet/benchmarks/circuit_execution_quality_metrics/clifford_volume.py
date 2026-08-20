@@ -30,7 +30,7 @@ class CliffordVolume(BaseBenchmark):
         num_circuits: int,
         num_measured_stabilizers: int = 4,
         stabilizer_threshold: float = 1 / np.exp(1),  # 1/e
-        destabilizer_threshold: float = 1 / (2 * np.exp(1)),  # 1/e
+        destabilizer_threshold: float = 1 / (2 * np.exp(1)),  # 1/2e
         seed: int | None = None,
         save_path: str | Path | FileManager | None = None,
     ):
@@ -65,12 +65,12 @@ class CliffordVolume(BaseBenchmark):
         # select pairs in [1, n] without replacement
         pairs = self.rng.choice(circuit.num_qubits, size=(num_two_qubit_gates, 2), replace=False)
         for pair in pairs:
-            gate = self.rng.choice(two_qubit_gates)
+            gate = two_qubit_gates[int(self.rng.integers(len(two_qubit_gates)))]
             gate(pair[0], pair[1])
         # fill in the rest of the qubits with single qubit gates
         for qubit in range(circuit.num_qubits):
             if qubit not in pairs.flatten():
-                gate = self.rng.choice(single_qubit_gates)
+                gate = single_qubit_gates[int(self.rng.integers(len(single_qubit_gates)))]
                 gate(qubit)
         return circuit
 
@@ -99,15 +99,18 @@ class CliffordVolume(BaseBenchmark):
 
         circuits = []
         for circuit_index in range(self.config["num_circuits"]):
-            # We want to measure the stabilizers and destabilizers
+            # We want to measure the stabilizers and destabilizers, not |00...0>
+            # so we need to append the random Clifford with the correct pre-measurement circuits.
             circuit = self._random_clifford_circuit()
             state = StabilizerState(circuit)
             clifford = state.clifford
+            # ...This is done by getting the Pauli labels of the stabilizers and destabilizers from the Clifford tableau
             stabilizer_labels = clifford.to_labels(mode="S")
             destabilizer_labels = clifford.to_labels(mode="D")
-            stablizers_to_measure = self.rng.choice(stabilizer_labels, size=self.config["num_measured_stabilizers"], replace=False)
+            stabilizers_to_measure = self.rng.choice(stabilizer_labels, size=self.config["num_measured_stabilizers"], replace=False)
             destabilizers_to_measure = self.rng.choice(destabilizer_labels, size=self.config["num_measured_stabilizers"], replace=False)
-            for stabilizer in stablizers_to_measure:
+            # ...and using _pauli_measurement_circuit to generate the measurement circuits to append.
+            for stabilizer in stabilizers_to_measure:
                 pauli = Pauli(stabilizer)
                 measurement_circuit = self._pauli_measurement_circuit(circuit, pauli)
                 circuits.append(
@@ -225,7 +228,7 @@ class CliffordVolume(BaseBenchmark):
             stabilizers - 2 * stabilizer_std >= self.config["stabilizer_threshold"]
         )
         destabilizer_worst_case = (
-            destabilizers + 2 * destabilizer_std <= self.config["destabilizer_threshold"]
+            np.abs(destabilizers) + 2 * destabilizer_std <= self.config["destabilizer_threshold"]
         )
 
         average_stabilizers = np.mean(stabilizers, axis=1)
@@ -237,7 +240,7 @@ class CliffordVolume(BaseBenchmark):
             >= self.config["stabilizer_threshold"]
         )
         destabilizer_average = (
-            average_destabilizers + 5 * average_destabilizer_std
+            np.abs(average_destabilizers) + 5 * average_destabilizer_std
             <= self.config["destabilizer_threshold"]
         )
 
